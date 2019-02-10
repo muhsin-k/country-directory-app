@@ -1,6 +1,6 @@
 # Country-Info-App
 
-Country-Info-App is a React native app build by using (https://countries.trevorblades.com/)](GraphQL API For Countries)
+Country-Info-App is a React native app build by using [https://countries.trevorblades.com/](GraphQL API For Countries)
 
 ### Installation
 
