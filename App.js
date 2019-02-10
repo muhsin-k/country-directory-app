@@ -1,50 +1,218 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- * @lint-ignore-every XPLATJSCOPYRIGHT1
- */
+import React, { Component, Fragment } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Container, Content, Header, Body, Title, ActionSheet, Picker, Form, Icon, Spinner } from 'native-base';
+import ApolloClient from 'apollo-boost';
+import gql from 'graphql-tag';
+import { ApolloProvider, Query, ApolloConsumer } from 'react-apollo';
+// write a GraphQL query that asks details for all countries
+const GET_COUNTRIES = gql`
+  {
+    countries {
+      name
+      code
+    }
+  }
+`;
+// write a GraphQL query that asks for each country details
+const GET_COUNTRY_DETAILS = gql`
+  query Country($countryCode: String!) {
+    country(code: $countryCode) {
+      name
+      native
+      emoji
+      currency
+      code
+      phone
+      languages {
+        code
+        name
+      }
+    }
+  }
+`;
 
-import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
-
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
+// initialize a GraphQL client
+const client = new ApolloClient({
+  uri: 'https://countries.trevorblades.com',
 });
+export default class App extends Component {
+  state = {
+    country: 'US',
+    countryDetails: null,
+    countryLoading: true,
+  };
+  componentDidMount = () => {
+    this.loadData();
+  };
 
-type Props = {};
-export default class App extends Component<Props> {
+  onValueChange(value) {
+    this.setState({ country: value });
+    setTimeout(() => {
+      this.loadData();
+    }, 0);
+  }
+
+  loadData = async () => {
+    this.setState({ countryLoading: true });
+    const { country } = this.state;
+    const { data } = await client.query({
+      query: GET_COUNTRY_DETAILS,
+      variables: { countryCode: country },
+    });
+    this.setState({
+      countryDetails: data.country,
+      countryLoading: false,
+    });
+  };
+
   render() {
+    const { countryLoading } = this.state;
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
-      </View>
+      <ApolloProvider client={client}>
+        <Container>
+          <Header>
+            <Body style={styles.titleBody}>
+              <Title>
+                <Text style={styles.title} t>
+                  Country Directory
+                </Text>
+              </Title>
+            </Body>
+          </Header>
+          <Content style={styles.mainContainer}>
+            <Query query={GET_COUNTRIES} client={client}>
+              {({ loading, error, data }) => {
+                if (loading) return countryLoading ? null : <Spinner color="green" />;
+                if (error) return <Text> {error.message}</Text>;
+                return (
+                  <View>
+                    <View>
+                      <Text style={styles.itemTitle}>Choose Country</Text>
+                    </View>
+                    <Form style={styles.picker}>
+                      <Picker
+                        mode="dropdown"
+                        iosHeader="Select your country"
+                        iosIcon={<Icon name="arrow-down" />}
+                        style={{ width: undefined }}
+                        selectedValue={this.state.country}
+                        onValueChange={this.onValueChange.bind(this)}
+                      >
+                        {data.countries.map(country => (
+                          <Picker.Item label={country.name} value={country.code} key={country.code} />
+                        ))}
+                      </Picker>
+                    </Form>
+                  </View>
+                );
+              }}
+            </Query>
+
+            <View>
+              {countryLoading ? (
+                <Spinner color="green" />
+              ) : (
+                <View>
+                  <View>
+                    <Text style={styles.itemTitle}>Country Info</Text>
+                  </View>
+                  <View style={styles.cardView}>
+                    <View style={styles.itemView}>
+                      <View style={{ flex: 2 }}>
+                        <Text>Name</Text>
+                      </View>
+                      <View style={{ flex: 2 }}>
+                        <Text style={styles.itemText}>: {this.state.countryDetails.name}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.itemView}>
+                      <View style={{ flex: 2 }}>
+                        <Text>Country code</Text>
+                      </View>
+                      <View style={{ flex: 2 }}>
+                        <Text style={styles.itemText}>: {this.state.countryDetails.code}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.itemView}>
+                      <View style={{ flex: 2 }}>
+                        <Text>Native</Text>
+                      </View>
+                      <View style={{ flex: 2 }}>
+                        <Text style={styles.itemText}>: {this.state.countryDetails.native}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.itemView}>
+                      <View style={{ flex: 2 }}>
+                        <Text>Currency</Text>
+                      </View>
+                      <View style={{ flex: 2 }}>
+                        <Text style={styles.itemText}>: {this.state.countryDetails.currency}</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.itemView}>
+                      <View style={{ flex: 2 }}>
+                        <Text>Phone Code</Text>
+                      </View>
+                      <View style={{ flex: 2 }}>
+                        <Text style={styles.itemText}>: {this.state.countryDetails.phone}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.itemView}>
+                      <View style={{ flex: 2 }}>
+                        <Text>Emoji</Text>
+                      </View>
+                      <View style={{ flex: 2 }}>
+                        <Text style={styles.itemText}>: {this.state.countryDetails.emoji}</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </View>
+          </Content>
+        </Container>
+      </ApolloProvider>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  titleBody: {
+    flex: 2,
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+  title: {
+    fontSize: 14,
+    fontWeight: '700',
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  mainContainer: {
+    flex: 1,
+    padding: 8,
+  },
+  itemTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  picker: {
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginTop: 4,
+    borderRadius: 4,
+  },
+  cardView: {
+    marginTop: 4,
+    marginBottom: 4,
+    padding: 8,
+    elevation: 2,
+    borderRadius: 4,
+    flex: 1,
+  },
+  itemView: {
+    flexDirection: 'row',
+  },
+  itemText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
