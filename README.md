@@ -1,6 +1,6 @@
 # Country Directory Application
 
-Country Directory Application is a React native app build by using (https://countries.trevorblades.com/)](GraphQL API For Countries)
+Country Directory Application is a React native app built by using [GraphQL API For Countries](https://countries.trevorblades.com/)
 
 ## Installation
 
