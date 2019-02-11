@@ -1,0 +1,29 @@
+{
+  "env": {
+    "node": true,
+    "browser": true,
+    "es6": true,
+    "jest": true
+  },
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+
+  "rules": {
+    "import/no-unresolved": [2, { "ignore": [".png$", ".webp$", ".jpg$"] }],
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react/prefer-stateless-function": 0,
+    "linebreak-style": 0,
+    "react/no-unescaped-entities": 0,
+    "object-curly-newline": "off",
+    "arrow-parens": 0,
+    "react/no-this-in-sfc": 0,
+    "no-shadow": "off",
+    "implicit-arrow-linebreak": "off",
+    "function-paren-newline": "off",
+    "operator-linebreak": "off",
+    "max-len": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "react/destructuring-assignment": "off",
+    "react/jsx-no-bind": "off"
+  }
+}

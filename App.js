@@ -1,9 +1,11 @@
-import React, { Component, Fragment } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Container, Content, Header, Body, Title, ActionSheet, Picker, Form, Icon, Spinner } from 'native-base';
+import React, { Component } from 'react';
+import { Text, View } from 'react-native';
+import { Container, Content, Header, Body, Title, Picker, Form, Icon, Spinner } from 'native-base';
 import ApolloClient from 'apollo-boost';
 import gql from 'graphql-tag';
-import { ApolloProvider, Query, ApolloConsumer } from 'react-apollo';
+import { ApolloProvider, Query } from 'react-apollo';
+
+import styles from './App.style';
 // write a GraphQL query that asks details for all countries
 const GET_COUNTRIES = gql`
   {
@@ -41,6 +43,7 @@ export default class App extends Component {
     countryDetails: null,
     countryLoading: true,
   };
+
   componentDidMount = () => {
     this.loadData();
   };
@@ -70,7 +73,7 @@ export default class App extends Component {
     return (
       <ApolloProvider client={client}>
         <Container>
-          <Header>
+          <Header style={{ backgroundColor: 'black' }} androidStatusBarColor="black">
             <Body style={styles.titleBody}>
               <Title>
                 <Text style={styles.title} t>
@@ -99,7 +102,11 @@ export default class App extends Component {
                         onValueChange={this.onValueChange.bind(this)}
                       >
                         {data.countries.map(country => (
-                          <Picker.Item label={country.name} value={country.code} key={country.code} />
+                          <Picker.Item
+                            label={country.name}
+                            value={country.code}
+                            key={country.code}
+                          />
                         ))}
                       </Picker>
                     </Form>
@@ -176,43 +183,3 @@ export default class App extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  titleBody: {
-    flex: 2,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  mainContainer: {
-    flex: 1,
-    padding: 8,
-  },
-  itemTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  picker: {
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginTop: 4,
-    borderRadius: 4,
-  },
-  cardView: {
-    marginTop: 4,
-    marginBottom: 4,
-    padding: 8,
-    elevation: 2,
-    borderRadius: 4,
-    flex: 1,
-  },
-  itemView: {
-    flexDirection: 'row',
-  },
-  itemText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});
